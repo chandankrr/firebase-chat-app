@@ -14,6 +14,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
+import Loader from '@/components/Loader';
 import { profileColors } from '@/utils/constants';
 
 const gProvider = new GoogleAuthProvider();
@@ -28,7 +29,8 @@ const Register = () => {
       // it means user logged in
       router.push('/');
     }
-  }, [currentUser, isLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, isLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +61,7 @@ const Register = () => {
 
       router.push('/');
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
@@ -67,7 +69,7 @@ const Register = () => {
     try {
       await signInWithPopup(auth, gProvider);
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
@@ -75,12 +77,12 @@ const Register = () => {
     try {
       await signInWithPopup(auth, fProvider);
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
   return isLoading || (!isLoading && currentUser) ? (
-    'Loading'
+    <Loader />
   ) : (
     <div className="h-[100vh] flex justify-center items-center bg-c1">
       <div className="flex items-center flex-col">

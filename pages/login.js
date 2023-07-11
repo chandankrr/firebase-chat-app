@@ -16,6 +16,8 @@ import {
 import ToastMessage from '@/components/ToastMessage';
 import { toast } from 'react-toastify';
 
+import Loader from '@/components/Loader';
+
 const gProvider = new GoogleAuthProvider();
 const fProvider = new FacebookAuthProvider();
 
@@ -29,7 +31,8 @@ const Login = () => {
       // it means user logged in
       router.push('/');
     }
-  }, [currentUser, isLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, isLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +42,7 @@ const Login = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
@@ -47,7 +50,7 @@ const Login = () => {
     try {
       await signInWithPopup(auth, gProvider);
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
@@ -55,7 +58,7 @@ const Login = () => {
     try {
       await signInWithPopup(auth, fProvider);
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
@@ -75,12 +78,12 @@ const Login = () => {
         }
       );
     } catch (error) {
-      console.log('An error occured: ', error);
+      console.error('An error occured: ', error);
     }
   };
 
   return isLoading || (!isLoading && currentUser) ? (
-    'Loading'
+    <Loader />
   ) : (
     <div className="h-[100vh] flex justify-center items-center bg-c1">
       <ToastMessage />

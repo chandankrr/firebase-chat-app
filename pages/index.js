@@ -3,19 +3,37 @@ import React, { useEffect } from 'react';
 
 import { useAuth } from '@/context/authContext';
 
+import Chats from '@/components/Chats';
+import LeftNav from '@/components/LeftNav';
+import Loader from '@/components/Loader';
+
 const Home = () => {
   const router = useRouter();
-  const { signOut, currentUser, isLoading } = useAuth();
+  const { currentUser, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !currentUser) {
       router.push('/login');
     }
-  }, [currentUser, isLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, isLoading]);
 
-  return (
-    <div>
-      <button onClick={signOut}>Sign Out</button>
+  return !currentUser ? (
+    <Loader />
+  ) : (
+    <div className="bg-c1 flex h-[100vh]">
+      <div className="flex w-full shrink-0">
+        <LeftNav />
+
+        <div className="flex bg-c2 grow">
+          <div className="w-[400px] p-5 overflow-auto scrollbar shrink-0 border-r border-white/[0.05]">
+            <div className="flex flex-col h-full ">
+              <Chats />
+            </div>
+          </div>
+          <div className="">Chat</div>
+        </div>
+      </div>
     </div>
   );
 };

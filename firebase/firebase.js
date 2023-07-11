@@ -5,12 +5,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDtRICxiCm6uCaA4F1rQW0vCRNLpUvqkj0',
-  authDomain: 'chat-app-3c2c5.firebaseapp.com',
-  projectId: 'chat-app-3c2c5',
-  storageBucket: 'chat-app-3c2c5.appspot.com',
-  messagingSenderId: '391994667816',
-  appId: '1:391994667816:web:aa553268e9d247201d161d',
+  apiKey: 'AIzaSyC42zSF9mvHIxfXlTcrUlxJbyYDmUIhGuc',
+  authDomain: 'chat-app-c1812.firebaseapp.com',
+  projectId: 'chat-app-c1812',
+  storageBucket: 'chat-app-c1812.appspot.com',
+  messagingSenderId: '560827929390',
+  appId: '1:560827929390:web:c24e63dafb395410d160bf',
 };
 
 const app = initializeApp(firebaseConfig);
