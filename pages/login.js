@@ -26,6 +26,8 @@ const fProvider = new FacebookAuthProvider();
 fProvider.setCustomParameters({
   display: 'popup',
 });
+fProvider.addScope('email');
+fProvider.addScope('public_profile');
 
 const Login = () => {
   const router = useRouter();
