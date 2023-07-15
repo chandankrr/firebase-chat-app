@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { IoLogoFacebook, IoLogoGoogle } from 'react-icons/io';
 
 import { useAuth } from '@/context/authContext';
-import { auth } from '@/firebase/firebase';
+import { auth, db } from '@/firebase/firebase';
 import {
   FacebookAuthProvider,
   GoogleAuthProvider,
+  onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -17,6 +18,7 @@ import ToastMessage from '@/components/ToastMessage';
 import { toast } from 'react-toastify';
 
 import Loader from '@/components/Loader';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const gProvider = new GoogleAuthProvider();
 const fProvider = new FacebookAuthProvider();
@@ -34,6 +36,17 @@ const Login = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, isLoading]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const email = e.target[0].value;
@@ -48,9 +61,29 @@ const Login = () => {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, gProvider);
+      // Sign in with Google using popup
+      const { user } = await signInWithPopup(auth, gProvider);
+
+      // Check if the user exists in the database
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        // If the user doesn't exist, save their information to the database
+        const colorIndex = Math.floor(Math.random() * profileColors.length);
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          color: profileColors[colorIndex],
+        });
+
+        await setDoc(doc(db, 'userChats', user.uid), {});
+      }
+
+      // console.log(user);
+
+      router.push('/');
     } catch (error) {
-      console.error('An error occured: ', error);
+      console.error('An error occurred: ', error);
     }
   };
 

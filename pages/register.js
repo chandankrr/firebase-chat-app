@@ -9,10 +9,11 @@ import {
   FacebookAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signInWithPopup,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 import Loader from '@/components/Loader';
 import { profileColors } from '@/utils/constants';
@@ -32,6 +33,17 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, isLoading]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const displayName = e.target[0].value;
@@ -40,12 +52,17 @@ const Register = () => {
     const colorIndex = Math.floor(Math.random() * profileColors.length);
 
     try {
+      // Create a new user with email and password
       const { user } = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
 
+      // Update the user's profile with display name
+      await updateProfile(user, { displayName: displayName });
+
+      // Save the user's information to the database
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         displayName: displayName,
@@ -55,21 +72,39 @@ const Register = () => {
 
       await setDoc(doc(db, 'userChats', user.uid), {});
 
-      await updateProfile(user, { displayName: displayName });
-
       console.log(user);
 
       router.push('/');
     } catch (error) {
-      console.error('An error occured: ', error);
+      console.error('An error occurred: ', error);
     }
   };
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, gProvider);
+      // Sign in with Google using popup
+      const { user } = await signInWithPopup(auth, gProvider);
+
+      // Check if the user exists in the database
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        // If the user doesn't exist, save their information to the database
+        const colorIndex = Math.floor(Math.random() * profileColors.length);
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          color: profileColors[colorIndex],
+        });
+
+        await setDoc(doc(db, 'userChats', user.uid), {});
+      }
+
+      // console.log(user);
+
+      router.push('/');
     } catch (error) {
-      console.error('An error occured: ', error);
+      console.error('An error occurred: ', error);
     }
   };
 
