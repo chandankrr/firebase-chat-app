@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { IoLogoFacebook, IoLogoGoogle } from 'react-icons/io';
 
 import { useAuth } from '@/context/authContext';
-import { auth } from '@/firebase/firebase';
+import { auth, db } from '@/firebase/firebase';
 import {
   FacebookAuthProvider,
   GoogleAuthProvider,
@@ -17,6 +17,8 @@ import ToastMessage from '@/components/ToastMessage';
 import { toast } from 'react-toastify';
 
 import Loader from '@/components/Loader';
+import { profileColors } from '@/utils/constants';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const gProvider = new GoogleAuthProvider();
 const fProvider = new FacebookAuthProvider();
@@ -48,9 +50,27 @@ const Login = () => {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, gProvider);
+      const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        const colorIndex = Math.floor(Math.random() * profileColors.length);
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          color: profileColors[colorIndex],
+        });
+
+        await setDoc(doc(db, 'userChats', user.uid), {});
+      }
+
+      setTimeout(() => {
+        window.location.reload();
+        router.push('/');
+      }, 0);
     } catch (error) {
-      console.error('An error occured: ', error);
+      console.error('An error occurred: ', error);
     }
   };
 
