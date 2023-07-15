@@ -9,6 +9,7 @@ import {
   FacebookAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signInWithPopup,
   updateProfile,
 } from 'firebase/auth';
@@ -32,6 +33,17 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, isLoading]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const displayName = e.target[0].value;
@@ -40,12 +52,17 @@ const Register = () => {
     const colorIndex = Math.floor(Math.random() * profileColors.length);
 
     try {
+      // Create a new user with email and password
       const { user } = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
 
+      // Update the user's profile with display name
+      await updateProfile(user, { displayName: displayName });
+
+      // Save the user's information to the database
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         displayName: displayName,
@@ -55,13 +72,11 @@ const Register = () => {
 
       await setDoc(doc(db, 'userChats', user.uid), {});
 
-      await updateProfile(user, { displayName: displayName });
-
       console.log(user);
 
       router.push('/');
     } catch (error) {
-      console.error('An error occured: ', error);
+      console.error('An error occurred: ', error);
     }
   };
 

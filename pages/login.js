@@ -8,17 +8,18 @@ import { auth, db } from '@/firebase/firebase';
 import {
   FacebookAuthProvider,
   GoogleAuthProvider,
+  onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 import ToastMessage from '@/components/ToastMessage';
 import { toast } from 'react-toastify';
 
 import Loader from '@/components/Loader';
 import { profileColors } from '@/utils/constants';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const gProvider = new GoogleAuthProvider();
 const fProvider = new FacebookAuthProvider();
@@ -35,6 +36,17 @@ const Login = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, isLoading]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
