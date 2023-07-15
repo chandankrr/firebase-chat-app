@@ -23,6 +23,9 @@ import { profileColors } from '@/utils/constants';
 
 const gProvider = new GoogleAuthProvider();
 const fProvider = new FacebookAuthProvider();
+fProvider.setCustomParameters({
+  display: 'popup',
+});
 
 const Login = () => {
   const router = useRouter();
@@ -62,7 +65,7 @@ const Login = () => {
 
   const signInWithGoogle = async () => {
     try {
-      const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+      const { user } = await signInWithPopup(auth, gProvider);
 
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (!userDoc.exists()) {
@@ -88,9 +91,38 @@ const Login = () => {
 
   const signInWithFacebook = async () => {
     try {
-      await signInWithPopup(auth, fProvider);
+      const result = await signInWithPopup(auth, fProvider);
+      const user = result.user;
+      const credential = FacebookAuthProvider.credentialFromResult(result);
+      const accessToken = credential.accessToken;
+
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        const colorIndex = Math.floor(Math.random() * profileColors.length);
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          color: profileColors[colorIndex],
+        });
+
+        await setDoc(doc(db, 'userChats', user.uid), {});
+      }
+
+      setTimeout(() => {
+        window.location.reload();
+        router.push('/');
+      }, 0);
     } catch (error) {
-      console.error('An error occured: ', error);
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential = FacebookAuthProvider.credentialFromError(error);
+
+      console.error('An error occurred: ', error);
     }
   };
 
