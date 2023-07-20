@@ -1,4 +1,4 @@
-# Chat App – Web application where you can chat with your loved ones 🔗[[Link]](https://vercel.com/chandankrr/firebase-chat-app)
+# Chat App – Web application where you can chat with your loved ones 🔗[[Link]](https://firebase-chat-app-chandankrr.vercel.app/login)
 
 A chat app where you can seamlessly communicate with friends and family. Features include user authentication, messaging, and user blocking. 
 
