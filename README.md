@@ -111,7 +111,7 @@ Start the server
 
 <kbd>
   <img src="https://github.com/chandankrr/firebase-chat-app/assets/87066174/015ad25c-5a7a-4de2-bec1-7410668604ae">
-<kbd/>
+</kbd>
 
 <br/>
 <br/>
